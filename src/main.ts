@@ -23,13 +23,20 @@ const testRom: number[] = [
 const canvas = <HTMLCanvasElement>document.getElementById("screen")
 const ctx = canvas.getContext("2d")
 const image = ctx.createImageData(canvas.width, canvas.height)
-for (let i = 0; i < 4 * canvas.width * canvas.height; i += 4) {
-    image.data[i] = 255;
-    image.data[i + 1] = 0;
-    image.data[i + 2] = 0;
-    image.data[i + 3] = 255;
+const videoMem = new Uint8Array(canvas.width * canvas.height); // 0s and 1s
+const videoBuff = new DataView(image.data.buffer); //higher level abstraction/interface to manipulate multiple bits at once
+
+
+for (let i = 0; i < canvas.width * canvas.height; i++) {
+    videoMem[i] = Math.round(Math.random());
 }
+
+for (let i = 0, j = 0; i < videoMem.length; i++, j += 4) {
+    videoBuff.setUint32(j, videoMem[i] != 0 ? 0xFF0000FF : 0); // this is red (rgb would be r,g,b,alfa = 255,0,0,255) each one byte so 32 bits
+}
+
 ctx.putImageData(image, 0, 0)
+
 
 // const vRegisters: Int8Array = new Int8Array(16)
 // let I: number = 0x0000;
