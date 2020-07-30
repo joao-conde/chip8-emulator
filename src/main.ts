@@ -20,29 +20,161 @@ const testRom: number[] = [
     0x6b, 0x20, 0xdb, 0xa1, 0x00, 0xee
 ]
 
-const canvas = <HTMLCanvasElement>document.getElementById("screen")
+type Chip8State = {
+    videoMem: Uint8Array,
+    mem: Uint8Array,
+    vRegisters: Int8Array,
+    I: number,
+    delay: number,
+    sound: number,
+    pc: number,
+    sp: number,
+    stack: Int16Array
+}
+
+//VIEW
+const PIXEL_SET_COLOR = 0xFF0000FF  //red
+const PIXEL_UNSET_COLOR = 0x00FF00FF //green
+const canvas = <HTMLCanvasElement> document.getElementById("screen")
 const ctx = canvas.getContext("2d")
 const image = ctx.createImageData(canvas.width, canvas.height)
-const videoMem = new Uint8Array(canvas.width * canvas.height); // 0s and 1s
-const videoBuff = new DataView(image.data.buffer); //higher level abstraction/interface to manipulate multiple bits at once
+const videoBuff = new DataView(image.data.buffer); //interface to manipulate pixels (R,G,B,A format i.e. 4 bytes or 32 bits)
+//
 
 
-for (let i = 0; i < canvas.width * canvas.height; i++) {
-    videoMem[i] = Math.round(Math.random());
+
+//DRAW
+// for (let i = 0; i < canvas.width * canvas.height; i++) { //TODO: remove
+//     chip8.videoMem[i] = Math.round(Math.random());
+// }
+// //
+
+
+function render(chip8: Chip8State){
+    for (let i = 0, j = 0; i < chip8.videoMem.length; i++, j += 4) {
+        videoBuff.setUint32(j, chip8.videoMem[i] === 1 ? PIXEL_SET_COLOR : PIXEL_UNSET_COLOR);
+    }
+    ctx.putImageData(image, 0, 0)
 }
 
-for (let i = 0, j = 0; i < videoMem.length; i++, j += 4) {
-    videoBuff.setUint32(j, videoMem[i] != 0 ? 0xFF0000FF : 0); // this is red (rgb would be r,g,b,alfa = 255,0,0,255) each one byte so 32 bits
+function execute(chip8: Chip8State){
+    const instruction = rom[chip8.pc] << 8 | rom[chip8.pc+1]
+    const id = instruction & 0xF000
+    const addr = instruction & 0x0FFF
+    const nibble = instruction & 0x000F
+    const x = instruction & 0x0F00
+    const y = instruction & 0x00F0
+    const byte = instruction & 0x00FF
+    
+    switch(id){
+        case 0x0000:
+            switch(byte){
+                case 0xE0:
+                    // clear screen
+                    break
+                case 0xEE:
+                    chip8.pc = chip8.stack[chip8.sp]
+                    chip8.sp--
+                    break
+            }    
+            break
+        
+        case 0x1000:
+            break
+        
+        case 0x2000:
+            chip8.sp++
+            chip8.stack[chip8.sp] = chip8.pc
+            chip8.pc = addr
+            break
+
+        case 0x3000:
+            if(chip8.vRegisters[x] == byte) chip8.pc += 3 //TODO is it 2 or 3?
+            break
+        
+        case 0x4000:
+            if(chip8.vRegisters[x] != byte) chip8.pc += 3 //TODO is it 2 or 3?
+            break
+        
+        case 0x5000:
+            if(chip8.vRegisters[x] == chip8.vRegisters[y]) chip8.pc += 3 //TODO is it 2 or 3?
+            break
+        
+        case 0x6000:
+            chip8.vRegisters[x] = byte
+            break
+
+        case 0x7000:
+            chip8.vRegisters[x] = chip8.vRegisters[x] + byte
+            break
+        
+        case 0x8000:
+            break
+
+        case 0x9000:
+            if(chip8.vRegisters[x] != chip8.vRegisters[y]) chip8.pc += 3 //TODO is it 2 or 3?
+            break
+        
+        case 0xA000:
+            chip8.I = addr
+            break
+
+        case 0xB000:
+            chip8.pc = addr + chip8.vRegisters[0]
+            break
+
+        case 0xC000:
+            chip8.vRegisters[x] = byte & Math.floor(Math.random() * 255)
+            break
+        
+        case 0xD000:
+            //TODO needs elaborate logic
+            break
+
+        case 0xE000:
+            //TODO needs keyboard state
+            break
+        
+        case 0xF000:
+
+            break
+
+        default:
+            console.log("Panic, instruction not recognized!")
+    }
+
+    chip8.pc += 2
 }
 
-ctx.putImageData(image, 0, 0)
+document.getElementById("playBtn").onclick = function(e) {
+    play()
+}
 
+let rom = null
+document.getElementById("romInput").onchange = function(e) {
+    const file = (e.target as HTMLInputElement).files[0]
+    const fr = new FileReader()
+    fr.onload = () => {rom = new Uint8Array(fr.result as ArrayBuffer)}
+    fr.readAsArrayBuffer(file)
+}
 
-// const vRegisters: Int8Array = new Int8Array(16)
-// let I: number = 0x0000;
-// let delay: number = 0x00;
-// let sound: number = 0x00;
+function play(){
+    rom = testRom;
 
-// let pc: number = 0x0000;
-// let sp: number = 0x00;
-// let stack: Int16Array = new Int16Array(16);
+    const chip8: Chip8State = {
+        videoMem: new Uint8Array(canvas.width * canvas.height), //active and not active bits (0s and 1s)
+        mem: new Uint8Array(4096),
+        vRegisters: new Int8Array(16),
+        I: 0x0000,
+        delay: 0x00,
+        sound: 0x00,
+        pc: 0x0000,
+        sp: 0x00,
+        stack: new Int16Array(16)
+    }
+    
+    for(let i = 0; i < 294; i++){
+        execute(chip8)
+        render(chip8)
+    }
+}
