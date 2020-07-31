@@ -32,12 +32,28 @@ type Chip8Type = {
     stack: Int16Array
 }
 
-//VIEW
-const PIXEL_SET_COLOR = 0xFF0000FF  //red
-const PIXEL_UNSET_COLOR = 0x00FF00FF //green
-const canvas = <HTMLCanvasElement> document.getElementById("screen")
-const ctx = canvas.getContext("2d")
-const image = ctx.createImageData(canvas.width, canvas.height)
+//VIEW using 2 canvas to scale the image
+const PIXEL_SET_COLOR = 0xFFFFFFFF  //white
+const PIXEL_UNSET_COLOR = 0x000000FF //black
+const width = 64
+const height = 32
+const scaledWidth = 640
+const scaledHeight = 320
+const xScale = scaledWidth / width
+const yScale = scaledHeight / height
+
+const scanvas = <HTMLCanvasElement> document.getElementById('screen')
+const dcanvas = <HTMLCanvasElement> document.createElement('canvas')
+
+const sctx = scanvas.getContext('2d')
+const dctx = dcanvas.getContext('2d')
+
+dcanvas.width = width
+dcanvas.height = height
+sctx.scale(xScale, yScale)
+sctx.imageSmoothingEnabled = false
+
+const image = dctx.createImageData(width, height)
 const videoBuff = new DataView(image.data.buffer); //interface to manipulate pixels (R,G,B,A format i.e. 4 bytes or 32 bits)
 //
 
@@ -45,7 +61,8 @@ function render(chip8: Chip8Type){
     for (let i = 0, j = 0; i < chip8.videoMem.length; i++, j += 4) {
         videoBuff.setUint32(j, chip8.videoMem[i] === 1 ? PIXEL_SET_COLOR : PIXEL_UNSET_COLOR);
     }
-    ctx.putImageData(image, 0, 0)
+    dctx.putImageData(image, 0, 0)
+    sctx.drawImage(dcanvas, 0, 0)
 }
 
 function drawSprite(chip8: Chip8Type, x0: number, y0: number, height: number){
@@ -55,9 +72,9 @@ function drawSprite(chip8: Chip8Type, x0: number, y0: number, height: number){
         const sprite = chip8.mem[chip8.I + y]
         for (let x = 0; x < 8; x += 1) {
             if((sprite & (0x80 >> x)) != 0){
-                if(chip8.videoMem[x0 + x + ((y0 + y) * 640)] == 1)
+                if(chip8.videoMem[x0 + x + ((y0 + y) * width)] == 1)
                     collision = 1
-                chip8.videoMem[x0 + x + ((y0 + y) * 640)] ^= 1
+                chip8.videoMem[x0 + x + ((y0 + y) * width)] ^= 1
             }
         } 
     }
@@ -79,7 +96,7 @@ function execute(chip8: Chip8Type){
         case 0x0000:
             switch(byte){
                 case 0xE0:
-                    //chip8.videoMem.map(_ => 0)
+                    chip8.videoMem.map(_ => 0)
                     break
                 case 0xEE:
                     chip8.sp--
@@ -137,16 +154,16 @@ function execute(chip8: Chip8Type){
                     chip8.vRegisters[x] = chip8.vRegisters[x] + chip8.vRegisters[y]
                     break
                 case 0x5:
-                    chip8.vRegisters[x] = chip8.vRegisters[x] - chip8.vRegisters[y]
-                    //TODO VF = borrow
+                    chip8.vRegisters[0xF] = chip8.vRegisters[x] > chip8.vRegisters[y] ? 1 : 0
+                    chip8.vRegisters[x] -= chip8.vRegisters[y]
                     break
                 case 0x6:
-                    chip8.vRegisters[x] = chip8.vRegisters[x] >> 1
+                    chip8.vRegisters[x] >>= 1
                     //TODO VF = ?
                     break
                 case 0x7:
+                    chip8.vRegisters[0xF] = chip8.vRegisters[y] > chip8.vRegisters[x] ? 1 : 0
                     chip8.vRegisters[x] = chip8.vRegisters[y] - chip8.vRegisters[x]
-                    //TODO VF = borrow
                     break
                 case 0xE:
                     chip8.vRegisters[x] = chip8.vRegisters[x] << 1
@@ -243,12 +260,12 @@ function loadROM(){
 
 function play(rom){
     
-    rom = testRom;
+    //rom = testRom;
 
     const chip8: Chip8Type = {
-        videoMem: new Uint8Array(canvas.width * canvas.height), //active and not active bits (0s and 1s)
+        videoMem: new Uint8Array(width * height), //active and not active bits (0s and 1s)
         mem: new Uint8Array(4096),
-        vRegisters: new Uint8Array(16),
+        vRegisters: new Uint8Array(16), 
         I: 0,
         delay: 0,
         sound: 0,
