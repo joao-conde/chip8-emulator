@@ -70,8 +70,8 @@ function execute(chip8: Chip8Type){
     const id = opcode & 0xF000
     const addr = opcode & 0x0FFF
     const nibble = opcode & 0x000F
-    const x = opcode & 0x0F00
-    const y = opcode & 0x00F0
+    const x = opcode >> 8 & 0xF //x needs to be a single hexadecimal digit to access registers
+    const y = opcode >> 4 & 0xF //y needs to be a single hexadecimal digit to access registers
     const byte = opcode & 0x00FF
     
     chip8.pc += 2 // take two opcodes from ROM
@@ -279,6 +279,5 @@ function play(rom){
     chip8.mem.set(fontSet, 0x00) // load font
     chip8.mem.set(rom, 0x200) // load rom into memory
 
-    window.setInterval(() => {execute(chip8); render(chip8);}, 100)
-    window.setInterval(() => {console.log(chip8.videoMem)}, 3000)
+    window.setInterval(() => {execute(chip8); render(chip8);}, 10)
 }
