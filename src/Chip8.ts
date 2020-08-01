@@ -1,31 +1,33 @@
+import {Chip8AudioController} from './Chip8AudioController.js'
+import {Chip8KeyboardController} from './Chip8KeyboardController.js'
+
 export class Chip8 {
-  vram: Uint8Array
-  ram: Uint8Array
-  registers: Uint8Array
-  stack: Int16Array
-  keys: Array<number> 
-  I: number
-  DT: number
-  ST: number
-  PC: number
-  SP: number 
+  private vram: Uint8Array
+  private ram: Uint8Array
+  private registers: Uint8Array
+  private stack: Int16Array
+  private I: number
+  private DT: number
+  private ST: number
+  private PC: number
+  private SP: number 
+
+  private audioController: Chip8AudioController
+  private keyboardController: Chip8KeyboardController
   
-  beeper: HTMLAudioElement
-
   public constructor() {
-    this.beeper = new Audio("src/beep.mp3")
-    this.beeper.volume = 0.1
-
     this.vram = new Uint8Array(64 * 32)
     this.ram = new Uint8Array(4096)
     this.registers = new Uint8Array(16)
-    this.keys = new Array<number>()
     this.I = 0
     this.DT = 0
     this.ST = 0
     this.PC = 0x200
     this.SP = 0
     this.stack = new Int16Array(16)
+
+    this.audioController = new Chip8AudioController("src/beep.mp3")
+    this.keyboardController = new Chip8KeyboardController()
 
     this.loadFont()
   } 
@@ -147,10 +149,10 @@ export class Chip8 {
         case 0xE000:
             switch(byte){
                 case 0x9E:
-                    if(this.keys.includes(this.registers[x])) this.PC += 2
+                    if(this.keyboardController.isPressed(this.registers[x])) this.PC += 2
                     break
                 case 0xA1:
-                    if(!this.keys.includes(this.registers[x])) this.PC += 2
+                    if(!this.keyboardController.isPressed(this.registers[x])) this.PC += 2
                     break
             }
             break
@@ -161,11 +163,8 @@ export class Chip8 {
                     this.registers[x] = this.DT
                     break
                 case 0x0A:
-                    if(this.keys.length !== 0){
-                        const lastKeyPressed = this.keys.pop()
-                        this.keys.unshift(lastKeyPressed)
-                        this.registers[x] = lastKeyPressed
-                    } 
+                    if(!this.keyboardController.noKeyPressed())
+                        this.registers[x] = this.keyboardController.getLastKeyPressed()
                     else  
                         this.PC -= 2
                     break
@@ -176,7 +175,7 @@ export class Chip8 {
                     this.ST = this.registers[x]
                     break
                 case 0x1E:
-                    this.I += this.registers[x]
+                    this.I += this.registers[x] 
                     break
                 case 0x29:
                     this.I = this.registers[x] * 5 //(8(1Byte) x 5 sprites)
@@ -210,10 +209,17 @@ export class Chip8 {
 
   public handleST(){
     if(this.ST > 0) {
-      if(this.ST) console.log("beep")
-      
+      this.audioController.beep()
       this.ST--
     }
+  }
+
+  public getVRAM() {
+    return this.vram
+  }
+
+  public getKeyboardController() {
+    return this.keyboardController
   }
 
   private loadFont() {
