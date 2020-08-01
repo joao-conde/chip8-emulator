@@ -12,8 +12,8 @@ export class Chip8CanvasView {
   private xScale
   private yScale
 
-  private scanvas = <HTMLCanvasElement> document.getElementById('screen')
-  private dcanvas = <HTMLCanvasElement> document.createElement('canvas')
+  private scanvas
+  private dcanvas
 
   private sctx
   private dctx
@@ -21,13 +21,17 @@ export class Chip8CanvasView {
   private image
   private videoBuff
 
-  constructor(chip8: Chip8){
+  constructor(chip8: Chip8, scanvas: HTMLCanvasElement, dcanvas: HTMLCanvasElement){
     this.chip8 = chip8
     this.xScale = this.scaledWidth / this.width
     this.yScale = this.scaledHeight / this.height
+    
+    this.scanvas = scanvas
+    this.dcanvas = dcanvas
+
     this.sctx = this.scanvas.getContext('2d')
     this.dctx = this.dcanvas.getContext('2d')
-
+    
     this.dcanvas.width = this.width
     this.dcanvas.height = this.height
     this.sctx.scale(this.xScale, this.yScale)
@@ -36,7 +40,8 @@ export class Chip8CanvasView {
     this.image = this.dctx.createImageData(this.width, this.height)
     this.videoBuff = new DataView(this.image.data.buffer); //interface to manipulate pixels (R,G,B,A format i.e. 4 bytes or 32 bits)
 
-
+    this.sctx.clearRect(0, 0, this.scanvas.width, this.scanvas.height);
+    this.dctx.clearRect(0, 0, this.dcanvas.width, this.dcanvas.height);
   }
 
   public render() {

@@ -15,7 +15,7 @@ export class Chip8 {
   private audioController: Chip8AudioController
   private keyboardController: Chip8KeyboardController
   
-  public constructor() {
+  public constructor(rom: Uint8Array) {
     this.vram = new Uint8Array(64 * 32)
     this.ram = new Uint8Array(4096)
     this.registers = new Uint8Array(16)
@@ -26,13 +26,14 @@ export class Chip8 {
     this.SP = 0
     this.stack = new Int16Array(16)
 
-    this.audioController = new Chip8AudioController("src/beep.mp3")
+    this.audioController = new Chip8AudioController("res/beep.mp3")
     this.keyboardController = new Chip8KeyboardController()
 
     this.loadFont()
+    this.loadROM(rom)
   } 
 
-  public loadROM(rom: Uint8Array) {
+  private loadROM(rom: Uint8Array) {
     this.ram.set(rom, 0x200) // load rom into memory
   }
 
