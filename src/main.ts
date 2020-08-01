@@ -34,6 +34,9 @@ sctx.imageSmoothingEnabled = false
 
 const image = dctx.createImageData(width, height)
 const videoBuff = new DataView(image.data.buffer); //interface to manipulate pixels (R,G,B,A format i.e. 4 bytes or 32 bits)
+
+const beeper = new Audio("src/beep.mp3")
+beeper.volume = 0.1
 //
 
 const keyMapper = {
@@ -253,8 +256,7 @@ function execute(chip8: Chip8Type){
     if(chip8.delay > 0) chip8.delay--
 
     if(chip8.sound > 0) {
-        if(chip8.sound)
-            console.log("Beep!")
+        if(chip8.sound) beeper.play()
         chip8.sound--
     }
 }
@@ -306,7 +308,7 @@ function play(rom){
     chip8.mem.set(fontSet, 0x00) // load font
     chip8.mem.set(rom, 0x200) // load rom into memory
 
-    window.setInterval(() => {execute(chip8); render(chip8);}, 10)
+    window.setInterval(() => {execute(chip8); render(chip8);}, 1)
 
     window.onkeydown = (event) => {
         if(!chip8.keyboard.includes(keyMapper[event.key]))
