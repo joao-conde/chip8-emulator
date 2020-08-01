@@ -36,6 +36,26 @@ const image = dctx.createImageData(width, height)
 const videoBuff = new DataView(image.data.buffer); //interface to manipulate pixels (R,G,B,A format i.e. 4 bytes or 32 bits)
 //
 
+const keyMapper = {
+    "1": 0x1,
+    "2": 0x2,
+    "3": 0x3,
+    "4": 0xC,
+    "q": 0x4,
+    "w": 0x5,
+    "e": 0x6,
+    "r": 0xD,
+    "a": 0x7,
+    "s": 0x8,
+    "d": 0x9,
+    "f": 0xE,
+    "z": 0xA,
+    "x": 0x0,
+    "c": 0xB,
+    "v": 0xF
+}
+
+
 function render(chip8: Chip8Type){
     for (let i = 0, j = 0; i < chip8.videoMem.length; i++, j += 4) {
         videoBuff.setUint32(j, chip8.videoMem[i] === 1 ? PIXEL_SET_COLOR : PIXEL_UNSET_COLOR);
@@ -287,4 +307,13 @@ function play(rom){
     chip8.mem.set(rom, 0x200) // load rom into memory
 
     window.setInterval(() => {execute(chip8); render(chip8);}, 10)
+
+    window.onkeydown = (event) => {
+        if(!chip8.keyboard.includes(keyMapper[event.key]))
+            chip8.keyboard.push(keyMapper[event.key])
+    }
+    
+    window.onkeyup = (event) => {
+        chip8.keyboard.splice(chip8.keyboard.indexOf(keyMapper[event.key]), 1)
+    }
 }
