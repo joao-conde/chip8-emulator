@@ -1,4 +1,4 @@
-# CHIP-8 Interpreter
+# CHIP-8 Emulator (WIP)
 
 ### ROMS
 https://johnearnest.github.io/chip8Archive/
