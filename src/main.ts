@@ -2,6 +2,7 @@ type Chip8Type = {
     videoMem: Uint8Array,
     mem: Uint8Array,
     vRegisters: Uint8Array,
+    keyboard: Array<number>,
     I: number,
     delay: number,
     sound: number,
@@ -74,7 +75,7 @@ function execute(chip8: Chip8Type){
         case 0x0000:
             switch(byte){
                 case 0xE0:
-                    chip8.videoMem.map(_ => 0)
+                    chip8.videoMem = chip8.videoMem.map(_ => 0x00)
                     break
                 case 0xEE:
                     chip8.sp--
@@ -110,7 +111,7 @@ function execute(chip8: Chip8Type){
             break
 
         case 0x7000:
-            chip8.vRegisters[x] = chip8.vRegisters[x] + byte
+            chip8.vRegisters[x] += byte
             break
         
         case 0x8000:
@@ -129,7 +130,7 @@ function execute(chip8: Chip8Type){
                     break
                 case 0x4:
                     chip8.vRegisters[0xF] = chip8.vRegisters[x] + chip8.vRegisters[y] > 0xFF ? 1 : 0
-                    chip8.vRegisters[x] = chip8.vRegisters[x] + chip8.vRegisters[y]
+                    chip8.vRegisters[x] += chip8.vRegisters[y]
                     break
                 case 0x5:
                     chip8.vRegisters[0xF] = chip8.vRegisters[x] > chip8.vRegisters[y] ? 1 : 0
@@ -149,7 +150,7 @@ function execute(chip8: Chip8Type){
                     break
             }
             break
-
+        
         case 0x9000:
             if(chip8.vRegisters[x] != chip8.vRegisters[y]) chip8.pc += 2
             break
@@ -171,7 +172,14 @@ function execute(chip8: Chip8Type){
             break
 
         case 0xE000:
-            //TODO needs keyboard state
+            switch(byte){
+                case 0x9E:
+                    if(chip8.keyboard.includes(chip8.vRegisters[x])) chip8.pc += 2
+                    break
+                case 0xA1:
+                    if(!chip8.keyboard.includes(chip8.vRegisters[x])) chip8.pc += 2
+                    break
+            }
             break
         
         case 0xF000:
@@ -180,7 +188,13 @@ function execute(chip8: Chip8Type){
                     chip8.vRegisters[x] = chip8.delay
                     break
                 case 0x0A:
-                    // TODO execution must stop needs keyboard state
+                    if(chip8.keyboard.length !== 0){
+                        const lastKeyPressed = chip8.keyboard.pop()
+                        chip8.keyboard.unshift(lastKeyPressed)
+                        chip8.vRegisters[x] = lastKeyPressed
+                    } 
+                    else  
+                        chip8.pc -= 2
                     break
                 case 0x15:
                     chip8.delay = chip8.vRegisters[x]
@@ -189,10 +203,10 @@ function execute(chip8: Chip8Type){
                     chip8.sound = chip8.vRegisters[x]
                     break
                 case 0x1E:
-                    chip8.I = chip8.I + chip8.vRegisters[x]
+                    chip8.I += chip8.vRegisters[x]
                     break
                 case 0x29:
-                    chip8.I = chip8.vRegisters[x] * 5 //(8(1byte)x5 sprites)
+                    chip8.I = chip8.vRegisters[x] * 5 //(8(1Byte) x 5 sprites)
                     break
                 case 0x33:
                     chip8.mem[chip8.I] = Math.floor(chip8.vRegisters[x] / 100)
@@ -240,7 +254,8 @@ function play(rom){
     const chip8: Chip8Type = {
         videoMem: new Uint8Array(width * height), //active and not active bits (0s and 1s)
         mem: new Uint8Array(4096),
-        vRegisters: new Uint8Array(16), 
+        vRegisters: new Uint8Array(16),
+        keyboard: new Array<number>(),
         I: 0,
         delay: 0,
         sound: 0,
@@ -248,7 +263,7 @@ function play(rom){
         sp: 0,
         stack: new Int16Array(16)
     }
-    
+
     const fontSet = [ 
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -260,7 +275,7 @@ function play(rom){
         0xF0, 0x10, 0x20, 0x40, 0x40, // 7
         0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
         0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A 
         0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
         0xF0, 0x80, 0x80, 0x80, 0xF0, // C
         0xE0, 0x90, 0x90, 0x90, 0xE0, // D
