@@ -24,25 +24,25 @@ export class Chip8KeyboardController {
     }
   }
 
-  public isPressed(val: number) {
+  public isPressed(val: number): boolean {
     return this.keys.includes(this.keyMapper[val])
   }
 
-  public noKeyPressed() {
+  public noKeyPressed(): boolean {
     return this.keys.length === 0
   }
 
-  public getLastKeyPressed() {
+  public getLastKeyPressed(): number {
     const lastKeyPressed = this.keys.pop()
     this.keys.unshift(lastKeyPressed)
     return lastKeyPressed
   }
 
-  public addPressedKey(key) {
+  public addPressedKey(key): void {
     this.keys.push(this.keyMapper[key])
   }
 
-  public removePressedKey(key) {
+  public removePressedKey(key): void {
     this.keys.splice(this.keys.indexOf(this.keyMapper[key]), 1)
   }
 }

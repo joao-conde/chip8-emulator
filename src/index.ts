@@ -28,7 +28,6 @@ async function play(){
   }
 }
 
-//User Input
 function readFileAsync(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

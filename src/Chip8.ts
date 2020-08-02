@@ -15,7 +15,7 @@ export class Chip8 {
   private audioController: Chip8AudioController
   private keyboardController: Chip8KeyboardController
   
-  public constructor(rom: Uint8Array) {
+  public constructor(rom: Uint8Array){
     this.vram = new Uint8Array(64 * 32)
     this.ram = new Uint8Array(4096)
     this.registers = new Uint8Array(16)
@@ -33,11 +33,7 @@ export class Chip8 {
     this.loadROM(rom)
   } 
 
-  private loadROM(rom: Uint8Array) {
-    this.ram.set(rom, 0x200) // load rom into memory
-  }
-
-  public executeOp() {
+  public executeOp(): void {
     const opcode = this.ram[this.PC] << 8 | this.ram[this.PC+1]
     const id = opcode & 0xF000
     const addr = opcode & 0x0FFF
@@ -204,26 +200,26 @@ export class Chip8 {
     }
   }
 
-  public handleDT(){
+  public handleDT(): void{
     if(this.DT > 0) this.DT--
   }
 
-  public handleST(){
+  public handleST(): void{
     if(this.ST > 0) {
       this.audioController.beep()
       this.ST--
     }
   }
 
-  public getVRAM() {
+  public getVRAM(): Uint8Array {
     return this.vram
   }
 
-  public getKeyboardController() {
+  public getKeyboardController(): Chip8KeyboardController{
     return this.keyboardController
   }
 
-  private loadFont() {
+  private loadFont(): void {
     const fontSet = [ 
       0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
       0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -246,7 +242,7 @@ export class Chip8 {
     this.ram.set(fontSet, 0x00)
   }
 
-  private drawSprite(x0: number, y0: number, height: number){
+  private drawSprite(x0: number, y0: number, height: number): number{
     let collision = 0
     
     for (let y = 0; y < height; y += 1) {
@@ -261,5 +257,9 @@ export class Chip8 {
     }
 
     return collision
+  }
+
+  private loadROM(rom: Uint8Array): void {
+    this.ram.set(rom, 0x200) // load rom into memory
   }
 }

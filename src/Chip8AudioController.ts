@@ -6,7 +6,7 @@ export class Chip8AudioController {
     this.beeper.volume = 0.1
   }
 
-  public beep() {
+  public beep(): void {
     this.beeper.play()
   }
 }
