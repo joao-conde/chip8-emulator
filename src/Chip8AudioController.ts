@@ -1,8 +1,8 @@
 export class Chip8AudioController {
   private beeper: HTMLAudioElement
 
-  constructor(mp3FilePath: string){
-    this.beeper = new Audio(mp3FilePath)
+  constructor(audioFilePath: string){
+    this.beeper = new Audio(audioFilePath)
     this.beeper.volume = 0.1
   }
 
