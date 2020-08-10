@@ -62,3 +62,18 @@ window.setInterval(() => chip8.processOpcode(), 1000 / clockFreq)
 window.setInterval(() => chip8.handleDT(), 1000 / delayTimerFreq)
 window.setInterval(() => chip8.handleST(), 1000 / soundTimerFreq)
 window.setInterval(() => chip8CanvasView.render(), 1000 / fps)
+
+
+// tests
+const request = new XMLHttpRequest();
+request.open("GET", "res/roms/", true);
+request.responseType = 'document'
+request.onload = function(e) {
+  const result = request.response as HTMLDocument; 
+  const files = result.body.children[1].children[0].children as HTMLCollection
+  for(let i = 0; i < files.length; i++){
+    console.log(files[i].children[3].children[0].textContent)
+  }
+}
+request.send();
+
