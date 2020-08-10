@@ -1,5 +1,6 @@
-import {Chip8AudioController} from './Chip8AudioController.js'
 import {Chip8KeyboardController} from './Chip8KeyboardController.js'
+
+const ramBytes = 4096
 
 export class Chip8 {
   private vram: Uint8Array
@@ -12,12 +13,17 @@ export class Chip8 {
   private PC: number
   private SP: number 
 
-  private audioController: Chip8AudioController
-  private keyboardController: Chip8KeyboardController
+  private beepAudio: HTMLAudioElement
+
+  private kc: Chip8KeyboardController
   
-  public constructor(rom: Uint8Array){
+  public constructor(beepAudioPath: string){
+    this.init(beepAudioPath)
+  } 
+
+  public init(beepAudioPath: string): void {
     this.vram = new Uint8Array(64 * 32)
-    this.ram = new Uint8Array(4096)
+    this.ram = new Uint8Array(ramBytes)
     this.registers = new Uint8Array(16)
     this.I = 0
     this.DT = 0
@@ -26,14 +32,19 @@ export class Chip8 {
     this.SP = 0
     this.stack = new Int16Array(16)
 
-    this.audioController = new Chip8AudioController("res/beep.mp3")
-    this.keyboardController = new Chip8KeyboardController()
+    this.beepAudio = new Audio(beepAudioPath)
+    this.beepAudio.volume = 0.1
+
+    this.kc = new Chip8KeyboardController()
 
     this.loadFont()
-    this.loadROM(rom)
-  } 
+  }
 
-  public executeOp(): void {
+  public loadROM(rom: Uint8Array): void {
+    this.ram.set(rom, 0x200) // load rom into memory
+  }
+
+  public processOpcode(): void {
     const opcode = this.ram[this.PC] << 8 | this.ram[this.PC+1]
     const id = opcode & 0xF000
     const addr = opcode & 0x0FFF
@@ -146,10 +157,10 @@ export class Chip8 {
         case 0xE000:
             switch(byte){
                 case 0x9E:
-                    if(this.keyboardController.isPressed(this.registers[x])) this.PC += 2
+                    if(this.kc.isActive(this.registers[x])) this.PC += 2
                     break
                 case 0xA1:
-                    if(!this.keyboardController.isPressed(this.registers[x])) this.PC += 2
+                    if(!this.kc.isActive(this.registers[x])) this.PC += 2
                     break
             }
             break
@@ -160,8 +171,8 @@ export class Chip8 {
                     this.registers[x] = this.DT
                     break
                 case 0x0A:
-                    if(!this.keyboardController.noKeyPressed())
-                        this.registers[x] = this.keyboardController.getLastKeyPressed()
+                    if(!this.kc.noActiveKey())
+                        this.registers[x] = this.kc.getLastActiveKey()
                     else  
                         this.PC -= 2
                     break
@@ -206,7 +217,7 @@ export class Chip8 {
 
   public handleST(): void{
     if(this.ST > 0) {
-      this.audioController.beep()
+      this.beepAudio.play()
       this.ST--
     }
   }
@@ -216,7 +227,7 @@ export class Chip8 {
   }
 
   public getKeyboardController(): Chip8KeyboardController{
-    return this.keyboardController
+    return this.kc
   }
 
   private loadFont(): void {
@@ -257,9 +268,5 @@ export class Chip8 {
     }
 
     return collision
-  }
-
-  private loadROM(rom: Uint8Array): void {
-    this.ram.set(rom, 0x200) // load rom into memory
   }
 }
