@@ -6,26 +6,23 @@ export class Chip8CanvasView {
   private pixelSetColor: number
   private pixelUnsetColor: number
 
-  private scaledCanvas: HTMLCanvasElement
-  private originalCanvas: HTMLCanvasElement
+  private scaledCanvas: HTMLCanvasElement = <HTMLCanvasElement> document.querySelector('canvas#scaled')
+  private originalCanvas: HTMLCanvasElement = <HTMLCanvasElement> document.querySelector('canvas#original')
 
-  private sctx: CanvasRenderingContext2D
-  private octx: CanvasRenderingContext2D
+  private sctx: CanvasRenderingContext2D = this.scaledCanvas.getContext('2d')
+  private octx: CanvasRenderingContext2D = this.originalCanvas.getContext('2d')
 
   private image: ImageData
   private videoBuff: DataView //interface to manipulate pixels (R,G,B,A format i.e. 4 bytes or 32 bits)
 
-  constructor(chip8: Chip8, scaledCanvas: HTMLCanvasElement, originalCanvas: HTMLCanvasElement, pixelSetColor: number, pixelUnsetColor: number){
+  constructor(chip8: Chip8, pixelSetColor: number, pixelUnsetColor: number){
     this.chip8 = chip8
+
+    this.sctx.scale(this.scaledCanvas.width / this.originalCanvas.width, this.scaledCanvas.height / this.originalCanvas.height)
+    this.sctx.imageSmoothingEnabled = false
 
     this.pixelSetColor = pixelSetColor
     this.pixelUnsetColor = pixelUnsetColor
-
-    this.scaledCanvas = scaledCanvas
-    this.originalCanvas = originalCanvas
-
-    this.sctx = this.scaledCanvas.getContext('2d')
-    this.octx = this.originalCanvas.getContext('2d')
     
     this.image = this.octx.createImageData(this.originalCanvas.width, this.originalCanvas.height)
     this.videoBuff = new DataView(this.image.data.buffer);

@@ -11,3 +11,16 @@ https://github.com/loktar00/chip8/tree/master/roms
 4. https://github.com/hugoferreira/chip8
 5. https://github.com/loktar00/chip8/
 6. https://github.com/stianeklund/chip8
+
+
+### TODO
+```js
+let arrayBuffer
+var oReq = new XMLHttpRequest();
+oReq.open("GET", "res/roms/BC_test.ch8", true);
+oReq.responseType = "arraybuffer";
+oReq.onload = function(e) {
+  arrayBuffer = oReq.response; 
+}
+oReq.send();
+```
