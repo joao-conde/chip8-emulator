@@ -32,22 +32,15 @@ const chip8 = new Chip8(beepAudioPath)
 const chip8CanvasView = new Chip8CanvasView(chip8, pixelSetColor, pixelUnsetColor)
 
 async function play(){ 
-  const romInput: HTMLInputElement = document.querySelector("input#rom")
-  const arrayBuffer = await getInputFile(romInput.files[0]);
+  //const romInput: HTMLInputElement = document.querySelector("input#rom")
+  //const arrayBuffer = await getInputFile(romInput.files[0]);
+  
+  const romInput: HTMLSelectElement = document.querySelector("select#romSelector")
+  const arrayBuffer = await getStoredROM(romInput.options[romInput.selectedIndex].value);
   const gameROM = new Uint8Array(arrayBuffer as ArrayBuffer)
   
   chip8.init(beepAudioPath)  
   chip8.loadROM(gameROM)
-}
-
-function getInputFile(file: File): Promise<ArrayBuffer|string> {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.readAsArrayBuffer(file);
-  })
 }
 
 (document.querySelector("button#playBtn") as HTMLButtonElement).onclick = play
@@ -63,8 +56,6 @@ window.setInterval(() => chip8.handleDT(), 1000 / delayTimerFreq)
 window.setInterval(() => chip8.handleST(), 1000 / soundTimerFreq)
 window.setInterval(() => chip8CanvasView.render(), 1000 / fps)
 
-
-// tests
 function getStoredROM(rom: string): Promise<ArrayBuffer|string> {
   return new Promise(resolve => {
     const request = new XMLHttpRequest();
@@ -78,10 +69,27 @@ function getStoredROM(rom: string): Promise<ArrayBuffer|string> {
   })
 }
 
-
-
-async function test(){
-  let x = await getStoredROM("jason.ch8")
-  console.log(x)
+function getInputFile(file: File): Promise<ArrayBuffer|string> {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.readAsArrayBuffer(file);
+  })
 }
-test()
+
+
+const storedROMs = [
+  "Merlin.ch8",
+  "Pong.ch8",
+  "TicTac.ch8"
+]
+
+const romSelector: HTMLSelectElement = document.querySelector("select#romSelector")
+storedROMs.forEach(romName => {
+  const option: HTMLOptionElement = document.createElement("option")
+  option.value = romName
+  option.text = romName
+  romSelector.add(option)
+})
