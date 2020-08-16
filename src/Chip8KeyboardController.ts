@@ -1,6 +1,6 @@
 export class Chip8KeyboardController {
   private activeKeys: Array<number> = new Array<number>()
-
+ 
   public isActive(val: number): boolean {
     return this.activeKeys.includes(val)
   }

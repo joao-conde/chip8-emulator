@@ -65,15 +65,23 @@ window.setInterval(() => chip8CanvasView.render(), 1000 / fps)
 
 
 // tests
-const request = new XMLHttpRequest();
-request.open("GET", "res/roms/", true);
-request.responseType = 'document'
-request.onload = function(e) {
-  const result = request.response as HTMLDocument; 
-  const files = result.body.children[1].children[0].children as HTMLCollection
-  for(let i = 0; i < files.length; i++){
-    console.log(files[i].children[3].children[0].textContent)
-  }
+function getStoredROM(rom: string): Promise<ArrayBuffer|string> {
+  return new Promise(resolve => {
+    const request = new XMLHttpRequest();
+    request.open("GET", `res/roms/${rom}`, true); 
+    request.responseType = 'arraybuffer'
+    request.onload = () => {
+      const result = request.response as ArrayBuffer; 
+      resolve(result)
+    }
+    request.send()
+  })
 }
-request.send();
 
+
+
+async function test(){
+  let x = await getStoredROM("jason.ch8")
+  console.log(x)
+}
+test()
