@@ -32,11 +32,12 @@ const chip8 = new Chip8(beepAudioPath)
 const chip8CanvasView = new Chip8CanvasView(chip8, pixelSetColor, pixelUnsetColor)
 
 async function play(){ 
-  //const romInput: HTMLInputElement = document.querySelector("input#rom")
-  //const arrayBuffer = await getInputFile(romInput.files[0]);
+  const romInput: HTMLInputElement = document.querySelector("input#rom")
+  const arrayBuffer = await getInputFile(romInput.files[0]);
   
-  const romInput: HTMLSelectElement = document.querySelector("select#romSelector")
-  const arrayBuffer = await getStoredROM(romInput.options[romInput.selectedIndex].value);
+  // const romInput: HTMLSelectElement = document.querySelector("select#romSelector")
+  // const arrayBuffer = await getStoredROM(romInput.options[romInput.selectedIndex].value);
+  
   const gameROM = new Uint8Array(arrayBuffer as ArrayBuffer)
   
   chip8.init(beepAudioPath)  
@@ -81,9 +82,22 @@ function getInputFile(file: File): Promise<ArrayBuffer|string> {
 
 
 const storedROMs = [
+  "Blitz.ch8",
+  "Breakout.ch8",
+  "Brix.ch8",
+  "Connect4.ch8",
+  "Flightrunner.ch8",
+  "Hidden.ch8",
   "Merlin.ch8",
+  "Missile.ch8",
+  "Outlaw.ch8",
   "Pong.ch8",
-  "TicTac.ch8"
+  "Space Invaders.ch8",
+  "Tank.ch8",
+  "Tetris.ch8",
+  "TicTac.ch8",
+  "UFO.ch8",
+  "Vers.ch8"
 ]
 
 const romSelector: HTMLSelectElement = document.querySelector("select#romSelector")
