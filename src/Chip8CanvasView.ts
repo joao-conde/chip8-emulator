@@ -1,5 +1,8 @@
 import { Chip8 } from "./Chip8";
 
+const originalWidth = 64;
+const originalHeight = 32;
+
 export class Chip8CanvasView {
   private chip8: Chip8
 
@@ -7,7 +10,7 @@ export class Chip8CanvasView {
   private pixelUnsetColor: number
 
   private scaledCanvas: HTMLCanvasElement = <HTMLCanvasElement> document.querySelector('canvas#scaled')
-  private originalCanvas: HTMLCanvasElement = <HTMLCanvasElement> document.querySelector('canvas#original')
+  private originalCanvas: HTMLCanvasElement = document.createElement("canvas");
 
   private sctx: CanvasRenderingContext2D = this.scaledCanvas.getContext('2d')
   private octx: CanvasRenderingContext2D = this.originalCanvas.getContext('2d')
@@ -17,6 +20,9 @@ export class Chip8CanvasView {
 
   constructor(chip8: Chip8, pixelSetColor: number, pixelUnsetColor: number){
     this.chip8 = chip8
+
+    this.originalCanvas.width = originalWidth;
+    this.originalCanvas.height = originalHeight;
 
     this.sctx.scale(this.scaledCanvas.width / this.originalCanvas.width, this.scaledCanvas.height / this.originalCanvas.height)
     this.sctx.imageSmoothingEnabled = false
