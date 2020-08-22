@@ -7,8 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { Chip8 } from './Chip8.js';
-import { Chip8CanvasView } from './Chip8CanvasView.js';
+import { Chip8 } from './Chip8/Chip8.js';
+import { Chip8CanvasView } from './Chip8/Chip8CanvasView.js';
 import { displayStoredROMs, getStoredROM } from './roms.js';
 const pixelSetColor = 0xFFFFFFFF; //white
 const pixelUnsetColor = 0x000000FF; //black
@@ -37,12 +37,14 @@ const clockFreq = 240; //Hz
 const fps = 144; //frames per second
 const chip8 = new Chip8(beepAudioPath);
 const chip8CanvasView = new Chip8CanvasView(chip8, pixelSetColor, pixelUnsetColor);
-const romSelector = document.querySelector("select#romSelector");
-displayStoredROMs(romSelector);
-document.querySelector("button#playBtn").onclick = play;
-function play() {
+const romList = document.querySelector("ul#roms");
+displayStoredROMs(romList);
+document.querySelectorAll("ul#roms li").forEach(li => {
+    li.onclick = () => play(`${li.innerHTML}.ch8`);
+});
+function play(romName) {
     return __awaiter(this, void 0, void 0, function* () {
-        const arrayBuffer = yield getStoredROM(romSelector.options[romSelector.selectedIndex].value);
+        const arrayBuffer = yield getStoredROM(romName);
         const gameROM = new Uint8Array(arrayBuffer);
         chip8.init(beepAudioPath);
         chip8.loadROM(gameROM);

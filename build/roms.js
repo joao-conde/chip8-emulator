@@ -16,12 +16,11 @@ const storedROMs = [
     "UFO",
     "Vers"
 ];
-export function displayStoredROMs(romSelector) {
+export function displayStoredROMs(romList) {
     storedROMs.forEach(romName => {
-        const option = document.createElement("option");
-        option.value = `${romName}.ch8`;
-        option.text = romName;
-        romSelector.add(option);
+        const item = document.createElement("li");
+        item.innerHTML = romName;
+        romList.appendChild(item);
     });
 }
 export function getStoredROM(rom) {
