@@ -7,8 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { Chip8 } from './Chip8/Chip8.js';
-import { Chip8CanvasView } from './Chip8/Chip8CanvasView.js';
+import { Chip8 } from './Chip8.js';
+import { Chip8CanvasView } from './Chip8CanvasView.js';
 import { displayStoredROMs, getStoredROM } from './roms.js';
 const pixelSetColor = 0xFFFFFFFF; //white
 const pixelUnsetColor = 0x000000FF; //black
