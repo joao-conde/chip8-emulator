@@ -1,5 +1,5 @@
-import {Chip8} from './Chip8/Chip8.js'
-import {Chip8CanvasView} from './Chip8/Chip8CanvasView.js'
+import {Chip8} from './Chip8.js'
+import {Chip8CanvasView} from './Chip8CanvasView.js'
 import {displayStoredROMs, getStoredROM} from './roms.js'
 
 const pixelSetColor = 0xFFFFFFFF  //white
