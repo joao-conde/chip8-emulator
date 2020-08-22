@@ -17,12 +17,11 @@ const storedROMs = [
   "Vers"
 ]
 
-export function displayStoredROMs(romSelector: HTMLSelectElement) {
+export function displayStoredROMs(romList: HTMLUListElement) {
   storedROMs.forEach(romName => {
-    const option: HTMLOptionElement = document.createElement("option")
-    option.value = `${romName}.ch8` 
-    option.text = romName
-    romSelector.add(option)
+    const item: HTMLLIElement = document.createElement("li")
+    item.innerHTML = romName
+    romList.appendChild(item)
   })
 }
 

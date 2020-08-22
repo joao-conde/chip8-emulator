@@ -1,5 +1,5 @@
-import {Chip8} from './Chip8.js'
-import {Chip8CanvasView} from './Chip8CanvasView.js'
+import {Chip8} from './Chip8/Chip8.js'
+import {Chip8CanvasView} from './Chip8/Chip8CanvasView.js'
 import {displayStoredROMs, getStoredROM} from './roms.js'
 
 const pixelSetColor = 0xFFFFFFFF  //white
@@ -32,12 +32,15 @@ const fps = 144 //frames per second
 const chip8 = new Chip8(beepAudioPath)
 const chip8CanvasView = new Chip8CanvasView(chip8, pixelSetColor, pixelUnsetColor)
 
-const romSelector: HTMLSelectElement = document.querySelector("select#romSelector")
-displayStoredROMs(romSelector);
+const romList: HTMLUListElement = document.querySelector("ul#roms")
+displayStoredROMs(romList);
 
-(document.querySelector("button#playBtn") as HTMLButtonElement).onclick = play
-async function play(){ 
-  const arrayBuffer = await getStoredROM(romSelector.options[romSelector.selectedIndex].value);
+document.querySelectorAll("ul#roms li").forEach(li => {
+  (li as HTMLLIElement).onclick = () => play(`${li.innerHTML}.ch8`)
+})
+
+async function play(romName: string){ 
+  const arrayBuffer = await getStoredROM(romName);
   const gameROM = new Uint8Array(arrayBuffer as ArrayBuffer)
   chip8.init(beepAudioPath)  
   chip8.loadROM(gameROM)
