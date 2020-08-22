@@ -6,11 +6,28 @@
         <link rel="stylesheet" type="text/css" href="index.css">
     </head>
     <body>
-        <button id="playBtn">Play</button>
-        <select id="romSelector">
-            <option disabled selected>Choose ROM...</option>
-        </select>
-        <canvas id="scaled" width="640" height="320"></canvas>
+        <div class="row">
+            <div class="column left">
+                <ul id="roms">
+                </ul>
+            </div>
+            
+            <div class="column middle">
+                <canvas id="scaled" width="640" height="320"></canvas>
+            </div>
+            
+            <div class="column right">
+                <ul>    
+                    TODO
+                    <li>Game Description</li>
+                    <li>Game Keys</li>
+                    <li>Chip8 Registers</li>
+                    <li>Assembly instruction run</li>
+                    <li>CPU frequency slider</li>
+                </ul>
+            </div>
+        </div>
+
         <script type="module" src="build/index.js"></script>
     </body>
 </html>
