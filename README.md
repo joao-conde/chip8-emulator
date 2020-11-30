@@ -1,5 +1,17 @@
 # CHIP-8 Emulator (WIP)
 
+## [Install TypeScript](https://www.typescriptlang.org/#installation)
+
+```bash
+npm install -g typescript 
+```
+
+## [Compile to JavaScript](https://code.visualstudio.com/docs/typescript/typescript-compiling)
+
+```bash
+tsc 
+```
+
 ### References
 Available ROMs collected from
 
