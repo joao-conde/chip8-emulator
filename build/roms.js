@@ -15,7 +15,10 @@ const storedROMs = [
     "TicTac",
     "UFO",
     "Vers",
-    "test/BC_test"
+    "test/BC_test",
+    "test/c8_test",
+    "test/Keypad Test [Hap, 2006]",
+    "test/test_opcode"
 ];
 export function displayStoredROMs(romList) {
     storedROMs.forEach(romName => {
