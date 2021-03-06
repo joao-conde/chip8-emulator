@@ -20,7 +20,9 @@ export class Chip8 {
         this.loadFont();
     }
     loadROM(rom) {
+        console.log(rom);
         this.ram.set(rom, 0x200); // load rom into memory
+        console.log(ram);
     }
     processOpcode() {
         const opcode = this.ram[this.PC] << 8 | this.ram[this.PC + 1];
